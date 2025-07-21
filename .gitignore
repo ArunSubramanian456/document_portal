@@ -1,1 +1,5 @@
 dp_env/
+.env
+document_portal.egg-info
+**/__pycache__
+
