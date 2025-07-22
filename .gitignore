@@ -2,4 +2,5 @@ dp_env/
 .env
 document_portal.egg-info
 **/__pycache__
+**/.ipynb_checkpoints/
 
