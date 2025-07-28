@@ -3,4 +3,8 @@ dp_env/
 document_portal.egg-info
 **/__pycache__
 **/.ipynb_checkpoints/
-
+venv/
+__pycache__/
+logs/
+*.pyc
+test.py
