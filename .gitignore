@@ -7,6 +7,6 @@ venv/
 __pycache__/
 logs/
 *.pyc
-test.py
 pdfs
 **/test_session/
+**/test_ingestion_analysis/
