@@ -9,3 +9,4 @@ logs/
 *.pyc
 test.py
 pdfs
+**/test_session/

@@ -9,4 +9,5 @@ ipykernel
 python-dotenv
 structlog
 pymupdf
+pydantic
 -e .
