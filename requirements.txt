@@ -10,4 +10,5 @@ python-dotenv
 structlog
 pymupdf
 pydantic
+pandas
 -e .
