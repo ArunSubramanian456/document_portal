@@ -2,9 +2,6 @@
 
 import sys
 import traceback
-from logger.custom_logger import CustomLogger
-
-logger = CustomLogger().get_logger(__file__)
 
 class DocumentPortalException(Exception):
     """Customer exception for Document Portal."""
@@ -26,6 +23,8 @@ class DocumentPortalException(Exception):
                 """
 
 if __name__ == "__main__":
+    from logger.custom_logger import CustomLogger
+    logger=CustomLogger().get_logger(__file__)
     try:
         # Simulate an error 
         a = 1/ 0

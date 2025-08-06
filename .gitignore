@@ -10,3 +10,4 @@ logs/
 pdfs
 **/test_session/
 **/test_ingestion_analysis/
+**/session_*/
