@@ -10,6 +10,7 @@ from model.models import *
 from prompt.prompt_library import PROMPT_REGISTRY 
 from langchain_core.output_parsers import JsonOutputParser
 from langchain.output_parsers import OutputFixingParser
+from model.models import SummaryResponse,PromptType
 
 
 class DocumentComparerLLM:
@@ -25,7 +26,7 @@ class DocumentComparerLLM:
             parser=self.parser
         )
 
-        self.prompt = PROMPT_REGISTRY["document_comparison"]
+        self.prompt = PROMPT_REGISTRY[PromptType.DOCUMENT_COMPARISON.value]
         self.chain = self.prompt | self.llm | self.parser
         self.log.info("DocumentComparerLLM initialized successfully")
 

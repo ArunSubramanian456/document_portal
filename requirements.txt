@@ -11,4 +11,7 @@ structlog
 pymupdf
 pydantic
 pandas
+streamlit
+langchain-core[tracing]
+pytest
 -e .
