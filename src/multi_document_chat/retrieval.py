@@ -48,7 +48,6 @@ class ConversationalRAG:
             self.retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 5})
             self.log.info("Loaded retriever from FAISS index", index_path=index_path, session_id = self.session_id)
 
-            self._build_lcel_chain()
             return self.retriever
 
         except Exception as e:
@@ -84,6 +83,7 @@ class ConversationalRAG:
             if not llm:
                 raise ValueError("LLM not loaded successfully")
             self.log.info("LLM loaded successfully", session_id=self.session_id)
+            return llm
         except Exception as e:
             self.log.error("Failed to load LLM", error = str(e), session_id=self.session_id)
             raise DocumentPortalException("Failed to load LLM", sys)
@@ -94,26 +94,31 @@ class ConversationalRAG:
 
     def _build_lcel_chain(self):
         try:
+            # 1) Rewrite question using chat history
             question_rewriter = (
-                {"input" : itemgetter("input"), "chat_history" : itemgetter("chat_history")}
+                {"input": itemgetter("input"), "chat_history": itemgetter("chat_history")}
                 | self.contextualize_prompt
                 | self.llm
                 | StrOutputParser()
             )
+
+            # 2) Retrieve docs for rewritten question
             retrieve_docs = question_rewriter | self.retriever | self._format_docs
-            self.chain = ( 
-            { 
-                "context" : retrieve_docs,
-                "input" : itemgetter("input"),
-                "chat_history" : itemgetter("chat_history"),
-            } 
-            | self.qa_prompt
-            | self.llm
-            | self.StrOutputParser()
+
+            # 3) Feed context + original input + chat history into answer prompt
+            self.chain = (
+                {
+                    "context": retrieve_docs,
+                    "input": itemgetter("input"),
+                    "chat_history": itemgetter("chat_history"),
+                }
+                | self.qa_prompt
+                | self.llm
+                | StrOutputParser()
             )
 
-            self.log.info("Built LCEL chain successfully", session_id=self.session_id)
+            self.log.info("LCEL graph built successfully", session_id=self.session_id)
 
         except Exception as e:
             self.log.error("Failed to build LCEL chain", error=str(e), session_id=self.session_id)
-            raise DocumentPortalException("Failed to build LCEL chain", sys) 
+            raise DocumentPortalException("Failed to build LCEL chain", sys)

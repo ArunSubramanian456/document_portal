@@ -99,7 +99,7 @@ class DocumentIngestor:
             vectorstore.save_local(str(self.session_faiss_dir))
             self.log.info("FAISS index created and saved", session_id = self.session_id, faiss_path = str(self.session_faiss_dir))
 
-            retriever = vectorstore.as_retriever(search_type = "similarty", search_kwargs = {"k": 5})
+            retriever = vectorstore.as_retriever(search_type = 'similarity', search_kwargs = {"k": 5})
 
             self.log.info("FAISS retriever created and ready to use", session_id=self.session_id)
             return retriever
