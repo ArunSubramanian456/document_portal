@@ -12,3 +12,4 @@ pdfs
 **/test_ingestion_analysis/
 **/session_*/
 data/single_document_chat/session_*
+archive/*
