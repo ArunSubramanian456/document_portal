@@ -72,7 +72,7 @@ class ConversationalRAG:
             if not os.path.isdir(index_path):
                 raise FileNotFoundError(f"FAISS index directory not found: {index_path}")
 
-            vectorstore = FAISS.load_local(index_path, embeddings)
+            vectorstore = FAISS.load_local(index_path, embeddings, allow_dangerous_deserialization= True)
             self.log.info("Loaded retriever from FAISS index", index_path=index_path)
             return vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 5})
 
