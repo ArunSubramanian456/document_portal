@@ -1,0 +1,37 @@
+Make me a web app called Document Portal with modern, responsive frontend consisting of two files: index.html and style.css. Do NOT produce placeholder/demo logic. 
+The JavaScript must call real FastAPI endpoints and render real responses. Refer to the attached main.py code to get the FastAPI endpoints.
+
+1) Use semantic HTML5 structure with <header>, <main>, <footer>.
+
+2) At the top, have a header with a 📚 logo, the title “Document Portal,” and three tab buttons: Document Analysis, Document Compare, and Doc Chat.
+
+3) Each tab should open a card section with a form to upload files and buttons to run actions:
+
+   a) Document Analysis: Upload a PDF and display structured JSON analysis results.
+
+   b) Document Compare: Upload a reference PDF and an actual PDF, then display a table of page-wise differences.
+
+   c) Doc Chat: Upload multiple files (PDF/DOCX/TXT), build/update a FAISS index with chunk size, overlap, Top-K, and allow asking questions with answers displayed.
+
+4) Include form validations (like required file input) and placeholders.
+
+5) Add explanatory text and muted helper labels.
+
+6) Include buttons like “Run Analysis,” “Compare,” “Build / Update Index,” and “Ask”
+
+7) Footer should say “© Document Portal • Demo UI” and “Frontend only – hook to your FastAPI later.”
+
+
+Style requirements (in style.css):
+
+1) Use a modern dark theme with gradients, rounded corners, and shadows.
+
+2) Use a clean font like Inter.
+
+3) Buttons should have hover effects.
+
+4) Make it mobile-friendly.
+
+The HTML should link to the CSS file for styling.
+
+

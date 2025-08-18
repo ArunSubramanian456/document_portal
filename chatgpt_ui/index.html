@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Document Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">📚</span>
+      <h1>Document Portal</h1>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Document Portal Sections">
+      <button class="tab active" data-tab="analysis" role="tab" aria-selected="true">Document Analysis</button>
+      <button class="tab" data-tab="compare" role="tab" aria-selected="false">Document Compare</button>
+      <button class="tab" data-tab="chat" role="tab" aria-selected="false">Doc Chat</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- Analysis -->
+    <section id="panel-analysis" class="card panel active" role="tabpanel" aria-labelledby="analysis-tab">
+      <h2>Analyze a PDF</h2>
+      <p class="muted">Upload a single PDF. The app will POST to <code>/analyze</code> and render the structured JSON it gets back.</p>
+      <form id="form-analyze" novalidate>
+        <label class="field">
+          <span>PDF file <span aria-hidden="true" class="req">*</span></span>
+          <input type="file" name="file" accept="application/pdf" required />
+          <small class="helper">Only .pdf files are accepted.</small>
+        </label>
+
+        <div class="actions">
+          <button type="submit" class="btn primary" id="btn-analyze">Run Analysis</button>
+        </div>
+      </form>
+
+      <div class="result">
+        <h3>Analysis Result</h3>
+        <pre id="output-analyze" class="codeblock" aria-live="polite"></pre>
+      </div>
+    </section>
+
+    <!-- Compare -->
+    <section id="panel-compare" class="card panel" role="tabpanel" aria-labelledby="compare-tab">
+      <h2>Compare Two PDFs</h2>
+      <p class="muted">Upload a reference PDF and an actual PDF. The app will POST to <code>/compare</code> and render a page-wise differences table.</p>
+      <form id="form-compare" novalidate>
+        <div class="grid-2">
+          <label class="field">
+            <span>Reference PDF <span aria-hidden="true" class="req">*</span></span>
+            <input type="file" name="reference" accept="application/pdf" required />
+            <small class="helper">Baseline or “expected” file.</small>
+          </label>
+
+          <label class="field">
+            <span>Actual PDF <span aria-hidden="true" class="req">*</span></span>
+            <input type="file" name="actual" accept="application/pdf" required />
+            <small class="helper">The new or modified file to compare.</small>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn primary" id="btn-compare">Compare</button>
+        </div>
+      </form>
+
+      <div class="result">
+        <h3>Differences</h3>
+        <div id="compare-meta" class="muted"></div>
+        <div class="table-wrap">
+          <table id="table-compare" class="table" aria-live="polite">
+            <thead id="thead-compare"></thead>
+            <tbody id="tbody-compare"></tbody>
+          </table>
+        </div>
+        <pre id="output-compare-error" class="codeblock hidden"></pre>
+      </div>
+    </section>
+
+    <!-- Chat / RAG -->
+    <section id="panel-chat" class="card panel" role="tabpanel" aria-labelledby="chat-tab">
+      <h2>Doc Chat (FAISS-backed)</h2>
+      <p class="muted">Build/update a FAISS index with your documents, then ask questions. Endpoints: <code>/chat/index</code> and <code>/chat/query</code>.</p>
+
+      <form id="form-index" novalidate>
+        <fieldset class="fieldset">
+          <legend>Build / Update Index</legend>
+          <label class="field">
+            <span>Files (PDF/DOCX/TXT) <span aria-hidden="true" class="req">*</span></span>
+            <input type="file" name="files" accept=".pdf,.docx,.txt" multiple required />
+            <small class="helper">You can select multiple files.</small>
+          </label>
+
+          <div class="grid-3">
+            <label class="field">
+              <span>Chunk size</span>
+              <input type="number" name="chunk_size" min="100" max="8000" step="50" value="1000" />
+              <small class="helper">Default: 1000</small>
+            </label>
+
+            <label class="field">
+              <span>Chunk overlap</span>
+              <input type="number" name="chunk_overlap" min="0" max="4000" step="10" value="200" />
+              <small class="helper">Default: 200</small>
+            </label>
+
+            <label class="field">
+              <span>Top-K</span>
+              <input type="number" name="k" min="1" max="50" step="1" value="5" />
+              <small class="helper">Default: 5</small>
+            </label>
+          </div>
+
+          <div class="grid-2">
+            <label class="switch">
+              <input type="checkbox" name="use_session_dirs" checked />
+              <span>Use session directories</span>
+            </label>
+
+            <label class="field">
+              <span>Session ID (optional)</span>
+              <input type="text" name="session_id" placeholder="Supply to reuse an index" />
+              <small class="helper">If empty, backend will create one.</small>
+            </label>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn primary" id="btn-index">Build / Update Index</button>
+          </div>
+        </fieldset>
+      </form>
+
+      <div id="index-status" class="status-card hidden"></div>
+
+      <form id="form-query" class="mt" novalidate>
+        <fieldset class="fieldset">
+          <legend>Ask</legend>
+          <div class="grid-2">
+            <label class="field">
+              <span>Question <span aria-hidden="true" class="req">*</span></span>
+              <input type="text" name="question" placeholder="Ask about your documents…" required />
+              <small class="helper">Example: “What are the key risks mentioned?”</small>
+            </label>
+
+            <label class="field">
+              <span>Top-K</span>
+              <input type="number" name="k" min="1" max="50" step="1" value="5" />
+              <small class="helper">Retriever depth.</small>
+            </label>
+          </div>
+
+          <div class="grid-2">
+            <label class="switch">
+              <input type="checkbox" name="use_session_dirs_q" checked />
+              <span>Use session directories</span>
+            </label>
+
+            <label class="field">
+              <span>Session ID <span aria-hidden="true" class="req">*</span></span>
+              <input type="text" name="session_id_q" id="session_id_q" placeholder="Will auto-fill after indexing" required />
+              <small class="helper">Must match an existing FAISS index.</small>
+            </label>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn primary" id="btn-ask">Ask</button>
+          </div>
+        </fieldset>
+      </form>
+
+      <div class="result">
+        <h3>Answer</h3>
+        <pre id="output-chat" class="codeblock" aria-live="polite"></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>© Document Portal • Demo UI</p>
+    <p class="muted">Frontend only – hook to your FastAPI later.</p>
+  </footer>
+
+  <script>
+    // -------------------------
+    // Config
+    // -------------------------
+    // By default, use same-origin FastAPI. Override with an absolute URL if needed.
+    const API_BASE = ""; // e.g., "http://localhost:8080"
+
+    // Utility to fully qualify endpoint
+    const api = (path) => `${API_BASE}${path}`;
+
+    // Small helpers
+    const $ = (sel) => document.querySelector(sel);
+    const show = (el) => el.classList.remove('hidden');
+    const hide = (el) => el.classList.add('hidden');
+
+    // -------------------------
+    // Tabs
+    // -------------------------
+    const tabButtons = document.querySelectorAll('.tab');
+    const panels = document.querySelectorAll('.panel');
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        const id = `#panel-${btn.dataset.tab}`;
+        document.querySelector(id).classList.add('active');
+      });
+    });
+
+    // -------------------------
+    // ANALYZE
+    // -------------------------
+    const formAnalyze = $('#form-analyze');
+    const outAnalyze = $('#output-analyze');
+
+    formAnalyze.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      outAnalyze.textContent = '';
+
+      const fd = new FormData(formAnalyze);
+      const file = fd.get('file');
+      if (!file || !file.name || !file.size) {
+        outAnalyze.textContent = 'Please choose a PDF file.';
+        return;
+      }
+
+      try {
+        const res = await fetch(api('/analyze'), {
+          method: 'POST',
+          body: fd
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `HTTP ${res.status}`);
+        }
+        const json = await res.json();
+        outAnalyze.textContent = JSON.stringify(json, null, 2);
+      } catch (err) {
+        outAnalyze.textContent = `Error: ${err.message}`;
+      }
+    });
+
+    // -------------------------
+    // COMPARE
+    // -------------------------
+    const formCompare = $('#form-compare');
+    const theadCompare = $('#thead-compare');
+    const tbodyCompare = $('#tbody-compare');
+    const compareMeta = $('#compare-meta');
+    const compareErr = $('#output-compare-error');
+
+    formCompare.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      theadCompare.innerHTML = '';
+      tbodyCompare.innerHTML = '';
+      compareMeta.textContent = '';
+      hide(compareErr);
+
+      const fd = new FormData(formCompare);
+      const ref = fd.get('reference');
+      const act = fd.get('actual');
+      if (!ref || !ref.size || !act || !act.size) {
+        compareMeta.textContent = 'Please choose both files.';
+        return;
+      }
+
+      try {
+        const res = await fetch(api('/compare'), {
+          method: 'POST',
+          body: fd
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `HTTP ${res.status}`);
+        }
+        const json = await res.json();
+        const rows = json.rows || [];
+        const sessionId = json.session_id;
+
+        compareMeta.textContent = `Session: ${sessionId} • Rows: ${rows.length}`;
+
+        if (rows.length === 0) {
+          theadCompare.innerHTML = '<tr><th>No differences found</th></tr>';
+          return;
+        }
+
+        // Build table headers dynamically from keys
+        const cols = Object.keys(rows[0]);
+        theadCompare.innerHTML = '<tr>' + cols.map(k => `<th>${escapeHtml(k)}</th>`).join('') + '</tr>';
+        tbodyCompare.innerHTML = rows.map(r =>
+          '<tr>' + cols.map(k => `<td>${escapeHtml(String(r[k]))}</td>`).join('') + '</tr>'
+        ).join('');
+      } catch (err) {
+        compareErr.textContent = `Error: ${err.message}`;
+        show(compareErr);
+      }
+    });
+
+    // -------------------------
+    // CHAT (Index + Query)
+    // -------------------------
+    const formIndex = $('#form-index');
+    const indexStatus = $('#index-status');
+    const formQuery = $('#form-query');
+    const outChat = $('#output-chat');
+    const sessionIdQ = $('#session_id_q');
+
+    formIndex.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      outChat.textContent = '';
+      hide(indexStatus);
+      indexStatus.innerHTML = '';
+
+      const fd = new FormData();
+      // files (required)
+      const filesInput = formIndex.querySelector('input[name="files"]');
+      if (!filesInput.files || filesInput.files.length === 0) {
+        indexStatus.innerHTML = '<span class="error">Please choose at least one file.</span>';
+        show(indexStatus);
+        return;
+      }
+      [...filesInput.files].forEach(f => fd.append('files', f));
+
+      // numeric params
+      const chunkSize = Number(formIndex.querySelector('input[name="chunk_size"]').value || 1000);
+      const chunkOverlap = Number(formIndex.querySelector('input[name="chunk_overlap"]').value || 200);
+      const k = Number(formIndex.querySelector('input[name="k"]').value || 5);
+      fd.append('chunk_size', String(chunkSize));
+      fd.append('chunk_overlap', String(chunkOverlap));
+      fd.append('k', String(k));
+
+      // use_session_dirs + optional session_id
+      const useSession = formIndex.querySelector('input[name="use_session_dirs"]').checked;
+      fd.append('use_session_dirs', String(useSession));
+      const sessionId = formIndex.querySelector('input[name="session_id"]').value.trim();
+      if (sessionId) fd.append('session_id', sessionId);
+
+      try {
+        const res = await fetch(api('/chat/index'), {
+          method: 'POST',
+          body: fd
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `HTTP ${res.status}`);
+        }
+        const json = await res.json();
+        const effectiveSession = json.session_id;
+        indexStatus.innerHTML = `
+          <div><strong>Index built.</strong></div>
+          <div>Session ID: <code>${escapeHtml(effectiveSession)}</code></div>
+          <div>use_session_dirs: <code>${escapeHtml(String(json.use_session_dirs))}</code>, k: <code>${escapeHtml(String(json.k))}</code></div>
+        `;
+        show(indexStatus);
+
+        // Autofill query session id
+        if (effectiveSession) {
+          sessionIdQ.value = effectiveSession;
+          sessionIdQ.setCustomValidity('');
+        }
+      } catch (err) {
+        indexStatus.innerHTML = `<span class="error">Error: ${escapeHtml(err.message)}</span>`;
+        show(indexStatus);
+      }
+    });
+
+    formQuery.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      outChat.textContent = '';
+
+      const q = formQuery.querySelector('input[name="question"]').value.trim();
+      const k = Number(formQuery.querySelector('input[name="k"]').value || 5);
+      const useSession = formQuery.querySelector('input[name="use_session_dirs_q"]').checked;
+      const sess = formQuery.querySelector('input[name="session_id_q"]').value.trim();
+
+      // validations from backend contract
+      if (useSession && !sess) {
+        outChat.textContent = 'session_id is required when use_session_dirs is enabled.';
+        return;
+      }
+
+      const fd = new FormData();
+      fd.append('question', q);
+      fd.append('k', String(k));
+      fd.append('use_session_dirs', String(useSession));
+      if (sess) fd.append('session_id', sess);
+
+      try {
+        const res = await fetch(api('/chat/query'), {
+          method: 'POST',
+          body: fd
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `HTTP ${res.status}`);
+        }
+        const json = await res.json();
+        // Backend returns: { answer, session_id, k, engine }
+        outChat.textContent = typeof json.answer === 'string'
+          ? json.answer
+          : JSON.stringify(json.answer, null, 2);
+      } catch (err) {
+        outChat.textContent = `Error: ${err.message}`;
+      }
+    });
+
+    // -------------------------
+    // Misc
+    // -------------------------
+    function escapeHtml(str) {
+      return str
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+  </script>
+</body>
+</html>
