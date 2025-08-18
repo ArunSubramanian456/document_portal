@@ -13,3 +13,4 @@ pdfs
 **/session_*/
 data/single_document_chat/session_*
 archive/*
+faiss_index/*
