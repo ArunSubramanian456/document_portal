@@ -11,7 +11,7 @@ The JavaScript must call real FastAPI endpoints and render real responses. Refer
 
    b) Document Compare: Upload a reference PDF and an actual PDF, then display a table of page-wise differences.
 
-   c) Doc Chat: Upload multiple files (PDF/DOCX/TXT), build/update a FAISS index with chunk size, overlap, Top-K, and allow asking questions with answers displayed.
+   c) Doc Chat: Upload multiple files (PDF/DOCX/TXT), build/update a FAISS index with session_id, chunk size, overlap, Top-K, and allow asking questions with answers displayed.
 
 4) Include form validations (like required file input) and placeholders.
 

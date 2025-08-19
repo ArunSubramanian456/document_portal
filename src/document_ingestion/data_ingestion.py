@@ -19,6 +19,36 @@ from utils.document_ops import load_documents, concat_for_analysis, concat_for_c
 
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt"}
 
+# Here is the key logical flow for Doc Chat
+# data flow: Files → Text → Chunks → Vectors → Searchable Index → Retriever for Chat.
+
+# def built_retriver(self, uploaded_files, chunk_size=1000, chunk_overlap=200, k=5):
+#     # Step 1: "Save the uploaded files safely"
+#     paths = save_uploaded_files(uploaded_files, self.temp_dir)
+    
+#     # Step 2: "Extract text from files (PDF, DOCX, etc.)"
+#     docs = load_documents(paths)
+    
+#     # Step 3: "Break into searchable chunks"
+#     chunks = self._split(docs, chunk_size, chunk_overlap)
+    
+#     # Step 4: "Create/update vector index"
+#     fm = FaissManager(self.faiss_dir, self.model_loader)
+    
+#     # Step 5: "Prepare data for FAISS"
+#     texts = [chunk.page_content for chunk in chunks]
+#     metas = [chunk.metadata for chunk in chunks]
+    
+#     # Step 6: "Load existing or create new index"
+#     vs = fm.load_or_create(texts=texts, metadatas=metas)
+    
+#     # Step 7: "Add only new documents"
+#     added = fm.add_documents(chunks)
+    
+#     # Step 8: "Return a retriever for chat"
+#     return vs.as_retriever(search_type="similarity", search_kwargs={"k": k})
+
+
 # FAISS Manager (load-or-create)
 class FaissManager:
     def __init__(self, index_dir: Path, model_loader: Optional[ModelLoader] = None):
