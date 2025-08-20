@@ -11,6 +11,6 @@ pdfs
 **/test_session/
 **/test_ingestion_analysis/
 **/session_*/
-data/*
-archive/*
-faiss_index/*
+data/
+archive/
+faiss_index/
