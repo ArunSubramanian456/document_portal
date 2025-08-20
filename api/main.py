@@ -10,8 +10,7 @@ from pathlib import Path
 from src.document_ingestion.data_ingestion import (
     DocHandler,
     DocumentComparator,
-    ChatIngestor,
-    FaissManager
+    ChatIngestor
 )
 from src.document_analyzer.data_analysis import DocumentAnalyzer
 from src.document_compare.document_comparer import DocumentComparerLLM
