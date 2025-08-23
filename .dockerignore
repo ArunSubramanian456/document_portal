@@ -10,5 +10,4 @@ dp_env/
 .gitignore
 .env
 archive/
-
-
+data/
