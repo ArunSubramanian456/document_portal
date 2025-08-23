@@ -1,7 +1,8 @@
 import yaml
+import os
 
 
-def load_config(config_path: str = "config\\config.yaml") -> dict:
+def load_config(config_path: str = os.path.join("config", "config.yaml")) -> dict:
     """
     Load configuration from a YAML file.
 
@@ -18,4 +19,4 @@ def load_config(config_path: str = "config\\config.yaml") -> dict:
     return config
 
 if __name__ == "__main__":
-    load_config("config\\config.yaml")
+    load_config(str(os.path.join("config", "config.yaml")))
