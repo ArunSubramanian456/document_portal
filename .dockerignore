@@ -11,3 +11,4 @@ dp_env/
 .env
 archive/
 data/
+faiss_index/
