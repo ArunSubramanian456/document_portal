@@ -1,22 +1,50 @@
 import yaml
 import os
+from pathlib import Path
 
 
-def load_config(config_path: str = os.path.join("config", "config.yaml")) -> dict:
-    """
-    Load configuration from a YAML file.
+# def load_config(config_path: str = os.path.join("config", "config.yaml")) -> dict:
+#     """
+#     Load configuration from a YAML file.
 
-    Args:
-        config_path (str): Path to the YAML configuration file.
+#     Args:
+#         config_path (str): Path to the YAML configuration file.
 
-    Returns:
-        dict: Configuration data as a dictionary.
-    """
-    with open(config_path, "r") as file:
-        config = yaml.safe_load(file)
+#     Returns:
+#         dict: Configuration data as a dictionary.
+#     """
+#     with open(config_path, "r") as file:
+#         config = yaml.safe_load(file)
         
-    print(config)
-    return config
+#     print(config)
+#     return config
+
+# if __name__ == "__main__":
+#     load_config(str(os.path.join("config", "config.yaml")))
+
+def _project_root() -> Path:
+    # .../utils/config_loader.py -> parents[1] == project root
+    return Path(__file__).resolve().parents[1]
+
+def load_config(config_path: str | None = None) -> dict:
+    """
+    Resolve config path reliably irrespective of CWD.
+    Priority: explicit arg > CONFIG_PATH env > <project_root>/config/config.yaml
+    """
+    env_path = os.getenv("CONFIG_PATH")
+    if config_path is None:
+        config_path = env_path or str(_project_root() / "config" / "config.yaml")
+
+    path = Path(config_path)
+    if not path.is_absolute():
+        path = _project_root() / path
+
+    if not path.exists():
+        raise FileNotFoundError(f"Config file not found: {path}")
+
+    with open(path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f) or {}
+    
 
 if __name__ == "__main__":
-    load_config(str(os.path.join("config", "config.yaml")))
+    load_config()
