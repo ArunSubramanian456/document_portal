@@ -1,5 +1,5 @@
 {
-  "family": "documentportaltd",
+  "family": "documentportaltaskdef",
   "networkMode": "awsvpc",
   "executionRoleArn": "arn:aws:iam::160885256293:role/ecsTaskExecutionRole",
   "requiresCompatibilities": ["FARGATE"],
@@ -7,7 +7,7 @@
   "memory": "8192",
   "containerDefinitions": [
     {
-      "name": "document-portal-container",
+      "name": "document-portallive-container",
       "image": "160885256293.dkr.ecr.us-east-1.amazonaws.com/documentportalliveclass",
       "cpu": 1024,
       "essential": true,
@@ -16,7 +16,7 @@
           "containerPort": 8080,
           "hostPort": 8080,
           "protocol": "tcp",
-          "name": "document-portal-container-8080-tcp",
+          "name": "document-portallive-container-8080-tcp",
           "appProtocol": "http"
         }
       ],
@@ -36,7 +36,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/documentportaltd",
+          "awslogs-group": "/ecs/documentportaltaskdef",
           "awslogs-region": "us-east-1",
           "awslogs-stream-prefix": "ecs",
           "awslogs-create-group": "true"
