@@ -267,3 +267,7 @@ Once deployed, your application will be available at:
 ### Vector Database
 - FAISS with in-memory and persistent storage
 - Session-based isolated indices
+
+![Portal_Analyze](https://github.com/ArunSubramanian456/document_portal/blob/main/portal_analyze.png?raw=true)
+![Portal_Compare](https://github.com/ArunSubramanian456/document_portal/blob/main/portal_compare.png?raw=true)
+![Portal_Chat](https://github.com/ArunSubramanian456/document_portal/blob/main/portal_chat.png?raw=true)

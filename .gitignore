@@ -14,3 +14,7 @@ pdfs
 data/
 archive/
 faiss_index/
+demo_automation.py
+demo_quick_reference.md
+video_demo_script.md
+run_demo.bat
